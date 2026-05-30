@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/13 09:39:57 by radib             #+#    #+#             */
-/*   Updated: 2026/05/27 12:46:13 by radib            ###   ########.fr       */
+/*   Updated: 2026/05/30 10:33:54 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,3 +19,4 @@
 // sigemptyset, sigfillset, sigaddset, sigdelset,
 // sigismember, lseek, fstat, fcntl, poll
 
+// Irssi
