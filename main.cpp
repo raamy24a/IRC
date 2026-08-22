@@ -6,9 +6,12 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:24:55 by radib             #+#    #+#             */
-/*   Updated: 2026/08/21 00:25:50 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/22 06:11:42 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include ""
+#include "server.hpp"
 int main()
+{
+    server a;
+}
