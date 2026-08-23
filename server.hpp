@@ -9,13 +9,16 @@
 #define MY_SOCK_PATH "/somepath"
 #define LISTEN_BACKLOG 50
 
+extern int	g_server_status;
+
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while (0)
 class server
 {
     public :
-        server(std::string port = "8080");
+        server(char *port, char *password);
         ~server();
     private :
         int _fd;
+        int _epollfd;
 } ;

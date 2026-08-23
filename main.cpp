@@ -6,12 +6,16 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 00:24:55 by radib             #+#    #+#             */
-/*   Updated: 2026/08/22 06:11:42 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/23 04:35:34 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "server.hpp"
-int main()
+int g_sever_status = 1;
+
+int main(int argc, char *argv[])
 {
-    server a;
+    if (argc != 3)
+        return (0);
+    server a(argv[1], argv[2]);
 }

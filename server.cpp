@@ -2,21 +2,24 @@
 #include <sys/socket.h>
 #include <stdint.h>
 #include <iostream>
+#include <sys/epoll.h>
 
-server::server(std::string port)
+server::server(char *port, char *password)
 {
     // setsockopt(_fd, );
-    int                 _fd, cfd;
+    int                 _fd, cfd, _epollfd;
     socklen_t           peer_addr_size;
-    sockaddr_in  my_addr, peer_addr;
-    if (std::atoi(port.c_str()) > UINT16_MAX || std::atoi(port.c_str()) < 0)
+    sockaddr_in  my_addr{}, peer_addr;
+    if (std::atoi(port) > UINT16_MAX || std::atoi(port) < 0)
         throw("erreur sur le port");
-    uint16_t port_uint = std::atoi(port.c_str());
+    uint16_t port_uint = std::atoi(port);
     _fd = socket(AF_INET, SOCK_STREAM, 0);
+    const int enable = 1;
+    if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        throw("Error");
     if (_fd == -1)
         handle_error("socket");
 
-    memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
     my_addr.sin_addr.s_addr = INADDR_ANY;
     my_addr.sin_port = htons(port_uint);
@@ -30,11 +33,56 @@ server::server(std::string port)
         at a time using accept(2). */
 
     peer_addr_size = sizeof(peer_addr);
+    _epollfd = epoll_create(67);
+    epoll_event ev{};
+    ev.events = EPOLLIN;
+    ev.data.fd = _fd;
+    // check return value epoll_ctl(edgecaserror)
+    epoll_ctl(_epollfd, EPOLL_CTL_ADD, _fd, &ev);
+    epoll_event events[10];
+    // check return value epoll_ctl(edgecaserror)
+    while (g_server_status)
+    {
+        int eventAmmount = epoll_wait(_epollfd, events, 10, 0);
+        int i = 0;
+        while (i < eventAmmount)
+        {
+            if (events[i].data.fd == _fd)
+                epoll_ctl(_epollfd, EPOLL_CTL_ADD, _fd, &ev);
+            else if (events[i].events &EPOLLIN)
+            {
+                char buffer[200];
+                int readbuff = 1;
+                memset(buffer, 0, 200);
+                if (readbuff = read(events[i].data.fd, &buffer, 199))
+                    printf("%s", buffer);
+                else
+                {
+                    epoll_ctl(_epollfd, EPOLL_CTL_DEL, _fd, &ev);
+                    close(events[i].data.fd);
+                }
+            }
+            else if (events[i].events &EPOLLHUP || events[i].events &EPOLLERR)
+
+        }
+    }
+
+
+
+
+
+
     cfd = accept(_fd, (struct sockaddr *) &peer_addr, &peer_addr_size);
-    char buffer[200];
-    memset(buffer, 0, 200);
-    read(cfd, &buffer, 199);
-    printf("%s", buffer);
+   
+    
+    
+    while (readbuff)
+    {
+        printf("\nboucle :\n");
+        readbuff = read(cfd, &buffer, 199);
+        buffer[readbuff] = '\0';
+        printf("%s", buffer);
+    }
     std::cout << buffer << std::endl;
     if (cfd == -1)
         handle_error("accept");
@@ -43,9 +91,11 @@ server::server(std::string port)
 
     if (close(_fd) == -1)
         handle_error("close");
+    (void)password;
 }
 
 server::~server()
 {
     close(_fd);
+    std::cout << "server destructor called" << std::endl;
 }
