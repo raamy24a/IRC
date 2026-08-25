@@ -98,6 +98,11 @@ void Server::init()
 					std::cout << "Client " << fdUsed << " : " << buffer << std::endl;
 					// std::cout << _clients[fdUsed].getAddr().sin_addr.s_addr << std::endl;
 					// std::cout.write(buffer, bytes) << std::endl;
+
+					readCommand(buffer);
+
+					// On mIRC connection
+					// buffer == CAP LS 302
 				}
 			}
 		}
@@ -105,4 +110,10 @@ void Server::init()
 
 	close(epFd);
 	close(serverSocket);
+}
+
+void Server::readCommand(std::string buffer)
+{
+	if (buffer.compare(0, 10, "CAP LS 302") == 0)
+		std::cout << "Connected to mIRC" << std::endl;
 }

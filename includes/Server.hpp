@@ -22,6 +22,7 @@ public:
 	~Server();
 
 	void init();
+	void readCommand(std::string buffer);
 
 private:
 	int _serverFd;
