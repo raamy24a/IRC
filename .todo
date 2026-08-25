@@ -4,3 +4,12 @@ Server:
 // Canal public : #
 // Canal prive  : &
 // Cmds use '/' like /join #canal
+
+/*
+Port 0 : Indique au système d'exploitation de choisir automatiquement un port disponible 
+	(port éphémère) lors d'un appel à bind().
+Ports 1 à 1023 : Ports privilégiés ou réservés (nécessitent des droits administrateur 
+	ou root sur les systèmes UNIX/Linux).
+Ports 1024 à 49151 : Ports enregistrés (utilisés par des applications courantes).
+Ports 49152 à 65535 : Ports dynamiques ou éphémères (utilisés par les connexions clientes).
+*/

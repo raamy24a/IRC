@@ -16,3 +16,6 @@ int main(int argc, char *argv[])
 
     return (0);
 }
+
+// ./ircserv 1024 pswd
+// nc 127.0.0.1 1024

@@ -16,6 +16,6 @@ public:
 	void init();
 
 private:
-	int _port;
+	uint16_t _port;
 	std::string _password;
 };
