@@ -13,3 +13,42 @@ Ports 1 à 1023 : Ports privilégiés ou réservés (nécessitent des droits adm
 Ports 1024 à 49151 : Ports enregistrés (utilisés par des applications courantes).
 Ports 49152 à 65535 : Ports dynamiques ou éphémères (utilisés par les connexions clientes).
 */
+
+/*
+                    ┌────────────────────┐
+                    │     epoll_create1  │
+                    └─────────┬──────────┘
+                              │
+                              ▼
+                    Add listening socket
+                              │
+                              ▼
+                    ┌────────────────────┐
+              ┌────►│    epoll_wait()   │◄────┐
+              │     └─────────┬──────────┘     │
+              │               │                │
+              │               ▼                │
+              │         Ready events           │
+              │               │                │
+              │       ┌───────┴────────┐       │
+              │       │                │       │
+              │       ▼                ▼       │
+              │   listen fd         client fd  │
+              │       │                │       │
+              │       ▼                ▼       │
+              │    accept()          recv()    │
+              │       │                │       │
+              │       ▼                ▼       │
+              │   new client       process     │
+              │       │                │       │
+              │       ▼                │       │
+              │  epoll_ctl(ADD)        │       │
+              │                        │       │
+              │       ┌────────────────┘       │
+              │       │                        │
+              │       ▼                        │
+              │   epoll_ctl(MOD)               │
+              │   or EPOLL_CTL_DEL             │
+              │                                │
+              └────────────────────────────────┘ 
+*/
