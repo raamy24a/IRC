@@ -1,0 +1,6 @@
+Server: 
+// socket(), bind(), listen(), accept()
+
+// Canal public : #
+// Canal prive  : &
+// Cmds use '/' like /join #canal
