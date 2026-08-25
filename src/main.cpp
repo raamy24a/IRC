@@ -26,3 +26,12 @@ int main(int argc, char *argv[])
 
 // ./ircserv 1024 pswd
 // nc 127.0.0.1 1024
+
+/*
+socket, setsockopt, bind, connect, listen, accept, send, recv, close, epoll
+getsockname, getprotobyname, gethostbyname, getaddrinfo, freeaddrinfo
+htons, htonl, ntohs, ntohl
+inet_addr, inet_ntoa, inet_ntop
+signal, sigaction, sigemptyset, sigfillset, sigaddset, sigdelset, sigismember
+lseek, fstat, fcntl,
+*/

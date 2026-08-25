@@ -1,6 +1,9 @@
 #pragma once
+#include "Client.hpp"
+
 #include <string>
 #include <iostream>
+#include <map>
 
 #include <unistd.h>
 #include <cstdlib>
@@ -21,6 +24,8 @@ public:
 	void init();
 
 private:
+	int _serverFd;
 	uint16_t _port;
 	std::string _password;
+	std::map<int, Client> _clients;
 };

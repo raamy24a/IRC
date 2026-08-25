@@ -10,6 +10,7 @@ void Server::init()
 {
 	// AF_INET      :   IPv4 protocol
 	// SOCK_STREAM  :   TCP socket
+	// -Server FD-
 	int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1)
 		throw std::runtime_error("Error: Failed socket()");
@@ -26,7 +27,7 @@ void Server::init()
 	// INADDR_ANY: Accept connections on any IP.
 	serverAddress.sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) == -1)
+	if (bind(serverSocket, (sockaddr *)&serverAddress, sizeof(serverAddress)) == -1)
 		throw std::runtime_error("Error: Failed bind()");
 
 	if (listen(serverSocket, 128) == -1)
@@ -49,47 +50,58 @@ void Server::init()
 
 		for (int i = 0; i < fds; i++)
 		{
+			// -FD in use-
 			int fdUsed = events[i].data.fd;
-			// if (fd != clientSocket)
-			// 	continue;
 			if (fdUsed == serverSocket)
 			{
-				int clientSocket = accept(serverSocket, NULL, NULL);
+				sockaddr_in clientAddr;
+				socklen_t clientAddrLen = sizeof(clientAddr);
+
+				// New connection
+				// -Client FD-
+				int clientSocket = accept(serverSocket, (sockaddr *)&clientAddr, &clientAddrLen);
 				if (clientSocket == -1)
 					throw std::runtime_error("Error: Failed accept()");
+
+				// Event IN from new connection
 				epoll_event clientEvent;
 				clientEvent.events = EPOLLIN;
 				clientEvent.data.fd = clientSocket;
 				if (epoll_ctl(epFd, EPOLL_CTL_ADD, clientSocket, &clientEvent) == -1)
 					throw std::runtime_error("Error: Failed client epoll_ctl()");
+
+				std::cout << "Client " << clientSocket << " connected." << std::endl;
+
+				Client newClient;
+				newClient.setAddr(clientAddr);
+				_clients[clientSocket] = newClient;
 			}
 			else
 			{
-				char buffer[1020];
-				ssize_t bytes = recv(fdUsed, buffer, sizeof(buffer), 0);
-				if (bytes > 0)
-					std::cout << "Client : " << buffer << std::endl;
-				else
+				char buffer[1024];
+				ssize_t bytes = recv(fdUsed, buffer, sizeof(buffer) - 1, 0);
+				if (bytes == 0)
 				{
+					std::cout << "Client " << fdUsed << " disconnected." << std::endl;
 					epoll_ctl(serverSocket, EPOLL_CTL_DEL, fdUsed, NULL);
 					close(fdUsed);
 				}
+				else if (bytes < 0)
+				{
+					throw std::runtime_error("Error: Couldn't read from client.");
+					epoll_ctl(serverSocket, EPOLL_CTL_DEL, fdUsed, NULL);
+					close(fdUsed);
+				}
+				else
+				{
+					buffer[bytes - 1] = '\0';
+					std::cout << "Client " << fdUsed << " : " << buffer << std::endl;
+					// std::cout << _clients[fdUsed].getAddr().sin_addr.s_addr << std::endl;
+					// std::cout.write(buffer, bytes) << std::endl;
+				}
 			}
-			// send(serverSocket, buffer, sizeof(buffer), 0);
 		}
 	}
-
-	// char buffer[1020] = {0};
-	// recv(clientSocket, buffer, sizeof(buffer), 0);
-	// std::cout << "Client : " << buffer << std::endl;
-
-	// std::string str = buffer;
-	// while (str != "EXIT")
-	// {
-	// 	recv(clientSocket, buffer, sizeof(buffer), 0);
-	// 	std::cout << "Client : " << buffer << std::endl;
-	// 	str = buffer;
-	// }
 
 	close(epFd);
 	close(serverSocket);

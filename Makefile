@@ -6,7 +6,7 @@ CPPFLAGS =		-std=c++98
 MKDIR =			mkdir -p
 RM =			rm -rf
 
-SRC =			main.cpp Server.cpp 
+SRC =			main.cpp Server.cpp Client.cpp
 OBJ =			$(SRC:.cpp=.o)
 
 all: $(NAME)
