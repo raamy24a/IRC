@@ -1,10 +1,15 @@
 #pragma once
 #include <string>
 #include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
+
 #include <unistd.h>
 #include <cstdlib>
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+// #include <netdb.h>
+
+#include <sys/epoll.h>
 
 class Server
 {

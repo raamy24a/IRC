@@ -10,9 +10,16 @@ int main(int argc, char *argv[])
         return (1);
     }
 
-    Server a(argv[1], argv[2]);
+    Server serv(argv[1], argv[2]);
 
-    a.init();
+    try
+    {
+        serv.init();
+    }
+    catch (std::exception &e)
+    {
+        std::cout << e.what() << std::endl;
+    }
 
     return (0);
 }

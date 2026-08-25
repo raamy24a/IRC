@@ -5,14 +5,11 @@
 #include <sys/epoll.h>
 int volatile g_server_status = 1;
 
-
-
-
 void server::addClientToServ(int fd)
 {
     int cfd;
-    if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _fd, &ev) == -1)
-                    throw("epoll_ctl error");
+    // if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _fd, &ev) == -1)
+    //     throw("epoll_ctl error");
     cfd = accept(_fd, 0, 0);
     client newClient(cfd);
     _clientVector.push_back(newClient);
@@ -21,8 +18,8 @@ void server::addClientToServ(int fd)
 server::server(char *port, char *password)
 {
     // setsockopt(_fd, );
-    int                 _fd, _epollfd;
-    sockaddr_in  my_addr;
+    int _fd, _epollfd;
+    sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(sockaddr_in));
     if (std::atoi(port) > UINT16_MAX || std::atoi(port) < 0)
         throw("erreur sur le port");
@@ -37,7 +34,7 @@ server::server(char *port, char *password)
     my_addr.sin_family = AF_INET;
     my_addr.sin_addr.s_addr = INADDR_ANY;
     my_addr.sin_port = htons(port_uint);
-    if (bind(_fd, (struct sockaddr *) &my_addr, sizeof(my_addr)) == -1)
+    if (bind(_fd, (struct sockaddr *)&my_addr, sizeof(my_addr)) == -1)
         throw("Error bind");
 
     if (listen(_fd, LISTEN_BACKLOG) == -1)
@@ -49,7 +46,7 @@ server::server(char *port, char *password)
     _epollfd = epoll_create(67);
     epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
-    
+
     ev.events = EPOLLIN;
     ev.data.fd = _fd;
     // check return value epoll_ctl(edgecaserror)
@@ -64,7 +61,7 @@ server::server(char *port, char *password)
         {
             if (events[i].data.fd == _fd)
             {
-                addClientToServ();
+                // addClientToServ();
             }
             else if (events[i].events & EPOLLIN)
             {
