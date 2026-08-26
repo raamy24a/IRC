@@ -1,27 +1,24 @@
-#include "server.hpp"
-#include <sys/socket.h>
-#include <stdint.h>
-#include <iostream>
-#include <sys/epoll.h>
-int volatile g_server_status = 1;
+#include "Server.hpp"
 
-
-
-
-void server::addClientToServ(int fd)
+void Server::addClientToServ()
 {
-    int cfd;
-    if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, _fd, &ev) == -1)
-                    throw("epoll_ctl error");
-    cfd = accept(_fd, 0, 0);
-    client newClient(cfd);
-    _clientVector.push_back(newClient);
+    int cfd = accept(_fd, 0, 0);
+
+
+    epoll_event ev;
+    memset(&ev, 0, sizeof(epoll_event));
+    
+    ev.events = EPOLLIN;
+    ev.data.fd = cfd;
+    if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
+        throw("epoll_ctl error");
+    Client newClient(cfd);
+    _clientMap.insert(std::pair(newClient.get_clientfd(), newClient));
 }
 
-server::server(char *port, char *password)
+Server::Server(char *port, char *password)
 {
     // setsockopt(_fd, );
-    int                 _fd, _epollfd;
     sockaddr_in  my_addr;
     memset(&my_addr, 0, sizeof(sockaddr_in));
     if (std::atoi(port) > UINT16_MAX || std::atoi(port) < 0)
@@ -49,7 +46,6 @@ server::server(char *port, char *password)
     _epollfd = epoll_create(67);
     epoll_event ev;
     memset(&ev, 0, sizeof(epoll_event));
-    
     ev.events = EPOLLIN;
     ev.data.fd = _fd;
     // check return value epoll_ctl(edgecaserror)
@@ -63,9 +59,7 @@ server::server(char *port, char *password)
         while (i < eventAmmount)
         {
             if (events[i].data.fd == _fd)
-            {
                 addClientToServ();
-            }
             else if (events[i].events & EPOLLIN)
             {
                 char buffer[200];
@@ -73,7 +67,7 @@ server::server(char *port, char *password)
                 memset(buffer, 0, 200);
                 readbuff = read(events[i].data.fd, &buffer, 199);
                 if (readbuff)
-                    printf("%s", buffer);
+                    _clientMap[events[i].data.fd].addBuffer(buffer);
                 else
                 {
                     epoll_ctl(_epollfd, EPOLL_CTL_DEL, _fd, &ev);
@@ -92,8 +86,8 @@ server::server(char *port, char *password)
     (void)password;
 }
 
-server::~server()
+Server::~Server()
 {
     close(_fd);
-    std::cout << "server destructor called" << std::endl;
+    std::cout << "Server destructor called" << std::endl;
 }

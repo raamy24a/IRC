@@ -1,34 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/21 00:24:55 by radib             #+#    #+#             */
-/*   Updated: 2026/08/24 22:42:54 by radib            ###   ########.fr       */
+/*   Created: 2026/08/23 20:37:08 by radib             #+#    #+#             */
+/*   Updated: 2026/08/26 00:58:31 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#pragma once
 #include "Server.hpp"
+#include <vector>
 
-volatile std::sig_atomic_t g_server_status = 1;
-
-void	handler(int sig)
+class Client
 {
-    (void)sig;
-    g_server_status = 0;
-}
+    public :
+        Client(int fd);
+        ~Client();
+        int get_clientfd();
+        void addBuffer(char *buffer);
+        std::string removeBuffer();
 
-int main(int argc, char *argv[])
-{
-    signal(SIGINT, handler);
-    if (argc != 3)
-        return (0);
-    try {
-        Server a(argv[1], argv[2]);
-    } 
-    catch (const char* msg) {
-        std::cout << "Caught string literal: " << msg << std::endl;
-    }
-}
+    private :
+        std::string _username;
+        std::string _nickname;
+        std::vector<> _channels;
+        bool _operator;
+        int _cfd;
+        std::string _clientString;
+} ;

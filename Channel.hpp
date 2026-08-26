@@ -1,22 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   client.hpp                                         :+:      :+:    :+:   */
+/*   Channel.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/23 20:37:08 by radib             #+#    #+#             */
-/*   Updated: 2026/08/23 21:43:34 by radib            ###   ########.fr       */
+/*   Created: 2026/08/26 01:37:08 by radib             #+#    #+#             */
+/*   Updated: 2026/08/26 04:25:36 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#pragma once
+#include "Server.hpp"
+#include "Client.hpp"
+#include <iostream>
 
-class client
+class Channel
 {
     public :
-        client(int fd);
-        ~client();
+        Channel();
     private :
-        bool _operator;
-        int _cfd;
-} ;
+        std::vector<Client> clients;
+        
+}

@@ -1,34 +1,42 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/08/21 00:24:55 by radib             #+#    #+#             */
-/*   Updated: 2026/08/24 22:42:54 by radib            ###   ########.fr       */
+/*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
+/*   Updated: 2026/08/25 02:35:13 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "Client.hpp"
 #include "Server.hpp"
 
-volatile std::sig_atomic_t g_server_status = 1;
-
-void	handler(int sig)
+Client::Client(int fd)
 {
-    (void)sig;
-    g_server_status = 0;
+    _cfd = fd;
 }
 
-int main(int argc, char *argv[])
+Client::~Client()
 {
-    signal(SIGINT, handler);
-    if (argc != 3)
+    
+}
+int Client::get_clientfd()
+{
+    return (_cfd);
+}
+void Client::addBuffer(char *buffer)
+{
+    _clientString.append(buffer);
+}
+
+std::string Client::removeBuffer()
+{
+    std::string ret;
+    if (_clientString.find('\r', 0) == -1)
         return (0);
-    try {
-        Server a(argv[1], argv[2]);
-    } 
-    catch (const char* msg) {
-        std::cout << "Caught string literal: " << msg << std::endl;
-    }
+    int Rpos = _clientString.find('\r', 0);
+    ret = _clientString.substr(0, Rpos);
+    return (ret);
 }
