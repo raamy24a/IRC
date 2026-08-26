@@ -68,7 +68,7 @@ void Server::init()
 				clientEvent.events = EPOLLIN;
 				clientEvent.data.fd = clientSocket;
 				if (epoll_ctl(epFd, EPOLL_CTL_ADD, clientSocket, &clientEvent) == -1)
-					throw std::runtime_error("Error: Failed client epoll_ctl()");
+					throw std::runtime_error("Error: Failed client epoll_ctl() ADD");
 
 				std::cout << "Client " << clientSocket << " connected." << std::endl;
 
@@ -78,6 +78,8 @@ void Server::init()
 			}
 			else
 			{
+				// if (!_clients[fdUsed].getCtl())
+				// {
 				char buffer[1024];
 				ssize_t bytes = recv(fdUsed, buffer, sizeof(buffer) - 1, 0);
 				if (bytes == 0)
@@ -95,15 +97,22 @@ void Server::init()
 				else
 				{
 					buffer[bytes - 1] = '\0';
-					std::cout << "Client " << fdUsed << " : " << buffer << std::endl;
+					// std::cout << "Client " << fdUsed << " : " << buffer << std::endl;
 					// std::cout << _clients[fdUsed].getAddr().sin_addr.s_addr << std::endl;
 					// std::cout.write(buffer, bytes) << std::endl;
 
-					readCommand(buffer);
-
-					// On mIRC connection
-					// buffer == CAP LS 302
+					readCommand(fdUsed, buffer);
 				}
+				// }
+				// else if (_clients[fdUsed].getCtl())
+				// {
+				// 	// std::cout << "Hey" << std::endl;
+				// 	epoll_event clientEvent;
+				// 	clientEvent.events = EPOLLOUT;
+				// 	clientEvent.data.fd = fdUsed;
+				// 	if (epoll_ctl(epFd, EPOLL_CTL_MOD, fdUsed, &clientEvent) == -1)
+				// 		throw std::runtime_error("Error: Failed client epoll_ctl() MOD");
+				// }
 			}
 		}
 	}
@@ -112,8 +121,81 @@ void Server::init()
 	close(serverSocket);
 }
 
-void Server::readCommand(std::string buffer)
+void Server::readCommand(int fd, std::string buffer)
 {
-	if (buffer.compare(0, 10, "CAP LS 302") == 0)
-		std::cout << "Connected to mIRC" << std::endl;
+	if (buffer.empty())
+		return;
+	// if (buffer.compare(0, 10, "CAP LS 302") == 0)
+	// {
+	// 	_clients[fd].setApp(true);
+	// 	std::cout << "Connected to mIRC : " << _clients[fd].getApp() << std::endl;
+	// }
+	// else
+	// 	std::cout << "Connected to NC : " << _clients[fd].getApp() << std::endl;
+
+	if (_clients[fd].isInChan())
+	{
+		// If is a cmd
+		if (buffer.at(0) == '/')
+		{
+			// std::cout << "It's command askip " << std::endl;
+			if (buffer.substr(1, 4) == "join")
+				joinChan(fd, buffer);
+		}
+		else
+		{
+			std::string buff = buffer + '\n';
+			std::map<int, Client>::iterator it;
+			for (it = _clients.begin(); it != _clients.end(); it++)
+			{
+				if (_clients[it->first].isInChan() && fd != it->first && _clients[it->first].getChan() == _clients[fd].getChan())
+				{
+					ssize_t bytes = send(it->first, buff.c_str(), buff.size(), 0);
+					if (bytes == 0)
+						throw std::runtime_error("Error: <In channel> Client isconnected ?");
+					else if (bytes < 0)
+						throw std::runtime_error("Error: <In channel> Couldn't read from client.");
+				}
+			}
+			std::cout << "Client " << fd << " on channel <" << _clients[fd].getChan() << "> : " << buff;
+		}
+	}
+	else
+	{
+		// If is a cmd
+		if (buffer.at(0) == '/')
+		{
+			// In join cmd
+			if (buffer.substr(1, 4) == "join")
+				joinChan(fd, buffer);
+			else if (buffer.substr(1, 3) == "msg")
+				msgClient(fd, buffer);
+			// std::cout << "yo" << std::endl;
+		}
+	}
+}
+
+void Server::msgClient(int fd, std::string buffer)
+{
+	(void)fd;
+	(void)buffer;
+}
+
+void Server::joinChan(int fd, std::string buffer)
+{
+	// Find a channel
+	if (buffer.at(6) == '#')
+	{
+		if (buffer.at(7) == ' ')
+		{
+			if (send(fd, "Error: Wrong channel naming.", 29, 0) == -1)
+				throw std::runtime_error("Error: Failed send()");
+			std::cerr << "Error: Wrong channel naming." << std::endl;
+			return;
+		}
+		// If this channel doesn't exists
+		// if ()
+		// std::cout << buffer.substr(7, buffer.size() - 1) << std::endl;
+		_clients[fd].setChan(true, buffer.substr(7, buffer.size() - 1));
+	}
 }

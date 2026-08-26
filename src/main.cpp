@@ -1,7 +1,5 @@
 #include "Server.hpp"
 
-// int g_sever_status = 1;
-
 int main(int argc, char *argv[])
 {
     if (argc != 3)
@@ -24,8 +22,8 @@ int main(int argc, char *argv[])
     return (0);
 }
 
-// ./ircserv 1024 pswd
-// nc 127.0.0.1 1024
+// ./ircserv 1024 1234
+// nc 127.0.0.1 1024 1234
 
 /*
 socket, setsockopt, bind, connect, listen, accept, send, recv, close, epoll
@@ -35,3 +33,9 @@ inet_addr, inet_ntoa, inet_ntop
 signal, sigaction, sigemptyset, sigfillset, sigaddset, sigdelset, sigismember
 lseek, fstat, fcntl,
 */
+
+// CR-LF (Carriage Return - Line Feed)
+
+// On mIRC connection
+// buffer == CAP LS 302
+// CAPacity LiSt 302 (response 302 from RFC 1459)

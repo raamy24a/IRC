@@ -52,3 +52,18 @@ Ports 49152 à 65535 : Ports dynamiques ou éphémères (utilisés par les conne
               │                                │
               └────────────────────────────────┘ 
 */
+
+
+Server:
+      - instance
+      - add new request
+      - queue msg in/out
+
+IRC:
+      - Parse string
+      - Create channels
+
+- Script bash stress test connect 200 clients to our IRC server
+
+Core        Niaka
+Server      Raamy

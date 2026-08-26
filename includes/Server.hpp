@@ -22,7 +22,9 @@ public:
 	~Server();
 
 	void init();
-	void readCommand(std::string buffer);
+	void readCommand(int fd, std::string buffer);
+	void joinChan(int fd, std::string buffer);
+	void msgClient(int fd, std::string buffer);
 
 private:
 	int _serverFd;
