@@ -78,8 +78,7 @@ void Server::init()
 			}
 			else
 			{
-				// if (!_clients[fdUsed].getCtl())
-				// {
+				_clients[fdUsed].setFd(fdUsed);
 				char buffer[1024];
 				ssize_t bytes = recv(fdUsed, buffer, sizeof(buffer) - 1, 0);
 				if (bytes == 0)
@@ -97,22 +96,8 @@ void Server::init()
 				else
 				{
 					buffer[bytes - 1] = '\0';
-					// std::cout << "Client " << fdUsed << " : " << buffer << std::endl;
-					// std::cout << _clients[fdUsed].getAddr().sin_addr.s_addr << std::endl;
-					// std::cout.write(buffer, bytes) << std::endl;
-
 					readCommand(fdUsed, buffer);
 				}
-				// }
-				// else if (_clients[fdUsed].getCtl())
-				// {
-				// 	// std::cout << "Hey" << std::endl;
-				// 	epoll_event clientEvent;
-				// 	clientEvent.events = EPOLLOUT;
-				// 	clientEvent.data.fd = fdUsed;
-				// 	if (epoll_ctl(epFd, EPOLL_CTL_MOD, fdUsed, &clientEvent) == -1)
-				// 		throw std::runtime_error("Error: Failed client epoll_ctl() MOD");
-				// }
 			}
 		}
 	}
@@ -125,22 +110,21 @@ void Server::readCommand(int fd, std::string buffer)
 {
 	if (buffer.empty())
 		return;
-	// if (buffer.compare(0, 10, "CAP LS 302") == 0)
-	// {
-	// 	_clients[fd].setApp(true);
-	// 	std::cout << "Connected to mIRC : " << _clients[fd].getApp() << std::endl;
-	// }
-	// else
-	// 	std::cout << "Connected to NC : " << _clients[fd].getApp() << std::endl;
+
+	Client &user = _clients[fd];
 
 	if (_clients[fd].isInChan())
 	{
 		// If is a cmd
 		if (buffer.at(0) == '/')
 		{
-			// std::cout << "It's command askip " << std::endl;
-			if (buffer.substr(1, 4) == "join")
+			splitTokens(fd, buffer);
+
+			std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
+			if (cmd == "join")
 				joinChan(fd, buffer);
+			else if (cmd == "msg")
+				msgClient(user);
 		}
 		else
 		{
@@ -165,20 +149,49 @@ void Server::readCommand(int fd, std::string buffer)
 		// If is a cmd
 		if (buffer.at(0) == '/')
 		{
-			// In join cmd
-			if (buffer.substr(1, 4) == "join")
+			splitTokens(fd, buffer);
+
+			std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
+			if (cmd == "join")
 				joinChan(fd, buffer);
-			else if (buffer.substr(1, 3) == "msg")
-				msgClient(fd, buffer);
-			// std::cout << "yo" << std::endl;
+			else if (cmd == "msg")
+				msgClient(user);
+			else if (cmd == "nick")
+				std::cout << "Change nickname" << std::endl;
+
+			removeTokens(fd);
 		}
 	}
 }
 
-void Server::msgClient(int fd, std::string buffer)
+void Server::removeTokens(int fd)
 {
-	(void)fd;
-	(void)buffer;
+	int size = _clients[fd].getToken().size();
+	for (int i = 0; i < size; i++)
+		_clients[fd].getToken().pop_back();
+}
+
+void Server::splitTokens(int fd, std::string buffer)
+{
+	std::stringstream ss(buffer);
+	std::string token;
+
+	while (getline(ss, token, ' '))
+		if (!token.empty())
+			_clients[fd].setToken(token);
+}
+
+void Server::msgClient(Client user)
+{
+	if (user.getToken().size() != 3)
+		send(user.getFd(), "Error: Wrong /msg syntax.\n", 27, 0);
+	else
+	{
+		int targetFd = atoi(user.getToken().at(1).c_str());
+		std::string msg = user.getToken().at(2) + '\n';
+		if (_clients.count(targetFd) && user.getFd() != targetFd)
+			send(targetFd, msg.c_str(), msg.size(), 0);
+	}
 }
 
 void Server::joinChan(int fd, std::string buffer)
