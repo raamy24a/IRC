@@ -122,7 +122,7 @@ void Server::readCommand(int fd, std::string buffer)
 
 			std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
 			if (cmd == "join")
-				joinChan(fd, buffer);
+				joinChan(user);
 			else if (cmd == "msg")
 				msgClient(user);
 		}
@@ -153,7 +153,7 @@ void Server::readCommand(int fd, std::string buffer)
 
 			std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
 			if (cmd == "join")
-				joinChan(fd, buffer);
+				joinChan(user);
 			else if (cmd == "msg")
 				msgClient(user);
 			else if (cmd == "nick")
@@ -183,32 +183,25 @@ void Server::splitTokens(int fd, std::string buffer)
 
 void Server::msgClient(Client user)
 {
-	if (user.getToken().size() != 3)
+	std::vector<std::string> tokens = user.getToken();
+
+	if (tokens.size() != 3)
 		send(user.getFd(), "Error: Wrong /msg syntax.\n", 27, 0);
 	else
 	{
-		int targetFd = atoi(user.getToken().at(1).c_str());
-		std::string msg = user.getToken().at(2) + '\n';
+		int targetFd = atoi(tokens.at(1).c_str());
+		std::string msg = tokens.at(2) + '\n';
 		if (_clients.count(targetFd) && user.getFd() != targetFd)
 			send(targetFd, msg.c_str(), msg.size(), 0);
 	}
 }
 
-void Server::joinChan(int fd, std::string buffer)
+void Server::joinChan(Client user)
 {
-	// Find a channel
-	if (buffer.at(6) == '#')
-	{
-		if (buffer.at(7) == ' ')
-		{
-			if (send(fd, "Error: Wrong channel naming.", 29, 0) == -1)
-				throw std::runtime_error("Error: Failed send()");
-			std::cerr << "Error: Wrong channel naming." << std::endl;
-			return;
-		}
-		// If this channel doesn't exists
-		// if ()
-		// std::cout << buffer.substr(7, buffer.size() - 1) << std::endl;
-		_clients[fd].setChan(true, buffer.substr(7, buffer.size() - 1));
-	}
+	std::vector<std::string> tokens = user.getToken();
+
+	if (tokens.size() != 2)
+		send(user.getFd(), "Error: Wrong /join syntax.\n", 28, 0);
+	else if (tokens.at(1).at(0) == '#' && tokens.at(1).at(1))
+		_clients[user.getFd()].setChan(true, tokens.at(1).substr(1, tokens.at(1).size() - 1));
 }

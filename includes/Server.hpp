@@ -31,7 +31,7 @@ public:
 	void splitTokens(int fd, std::string buffer);
 	void removeTokens(int fd);
 
-	void joinChan(int fd, std::string buffer);
+	void joinChan(Client user);
 	void msgClient(Client user);
 
 private:
