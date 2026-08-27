@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include "Client.hpp"
 
 void Server::addClientToServ()
 {
@@ -13,7 +14,8 @@ void Server::addClientToServ()
     if (epoll_ctl(_epollfd, EPOLL_CTL_ADD, cfd, &ev) == -1)
         throw("epoll_ctl error");
     Client newClient(cfd);
-    _clientMap.insert(std::pair(newClient.get_clientfd(), newClient));
+    _clientMap.insert(std::pair<int, Client>(newClient.get_clientfd(), newClient));
+    std::cout << "Client  : " << newClient.get_clientfd() << " Connected"<< std::endl; 
 }
 
 Server::Server(char *port, char *password)
@@ -59,7 +61,9 @@ Server::Server(char *port, char *password)
         while (i < eventAmmount)
         {
             if (events[i].data.fd == _fd)
+            {
                 addClientToServ();
+            }
             else if (events[i].events & EPOLLIN)
             {
                 char buffer[200];
