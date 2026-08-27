@@ -119,16 +119,17 @@ void Server::readCommand(int fd, std::string buffer)
 		if (buffer.at(0) == '/')
 		{
 			splitTokens(fd, buffer);
-
-			std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
-			if (cmd == "join")
-				joinChan(user);
-			else if (cmd == "msg")
-				msgClient(user);
+			handleCmds(user);
+			removeTokens(fd);
 		}
 		else
 		{
-			std::string buff = buffer + '\n';
+			// Convert FD, from int to string
+			std::ostringstream fd_str;
+			fd_str << fd;
+			// Concatenate Nickname (now fd) with client's msg
+			std::string buff = fd_str.str() + " : " + buffer + '\n';
+
 			std::map<int, Client>::iterator it;
 			for (it = _clients.begin(); it != _clients.end(); it++)
 			{
@@ -136,7 +137,7 @@ void Server::readCommand(int fd, std::string buffer)
 				{
 					ssize_t bytes = send(it->first, buff.c_str(), buff.size(), 0);
 					if (bytes == 0)
-						throw std::runtime_error("Error: <In channel> Client isconnected ?");
+						throw std::runtime_error("Error: <In channel> Client disconnected ?");
 					else if (bytes < 0)
 						throw std::runtime_error("Error: <In channel> Couldn't read from client.");
 				}
@@ -150,17 +151,25 @@ void Server::readCommand(int fd, std::string buffer)
 		if (buffer.at(0) == '/')
 		{
 			splitTokens(fd, buffer);
-
-			std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
-			if (cmd == "join")
-				joinChan(user);
-			else if (cmd == "msg")
-				msgClient(user);
-			else if (cmd == "nick")
-				std::cout << "Change nickname" << std::endl;
-
+			handleCmds(user);
 			removeTokens(fd);
 		}
+	}
+}
+
+void Server::handleCmds(Client user)
+{
+	std::string cmd = user.getToken()[0].substr(1, user.getToken()[0].size());
+	if (cmd == "join")
+		joinChan(user);
+	else if (cmd == "msg")
+		msgClient(user);
+	else if (cmd == "nick")
+		std::cout << "Change nickname" << std::endl;
+	else
+	{
+		std::string str = "<" + cmd + ">" + " :Unknown command\n";
+		send(user.getFd(), str.c_str(), str.size(), 0);
 	}
 }
 

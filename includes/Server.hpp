@@ -27,6 +27,7 @@ public:
 	void init();
 
 	void readCommand(int fd, std::string buffer);
+	void handleCmds(Client user);
 
 	void splitTokens(int fd, std::string buffer);
 	void removeTokens(int fd);

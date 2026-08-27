@@ -67,3 +67,8 @@ IRC:
 
 Core        Niaka
 Server      Raamy
+
+Client:
+      Nickname :
+            - Maximum length of 9
+            - Nickname chosen at Authentification ?
