@@ -17,6 +17,9 @@ public:
 	int getFd();
 	void setFd(int fd);
 
+	std::string getNick();
+	void setNick(std::string nick);
+
 	sockaddr_in getAddr();
 	void setAddr(sockaddr_in address);
 
@@ -41,4 +44,5 @@ private:
 	int _ctl;
 	std::vector<std::string> _tokens;
 	int _fd;
+	std::string _nick;
 };

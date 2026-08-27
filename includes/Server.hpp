@@ -34,6 +34,7 @@ public:
 
 	void joinChan(Client user);
 	void msgClient(Client user);
+	void changeNick(Client user);
 
 private:
 	int _serverFd;

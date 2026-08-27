@@ -7,6 +7,7 @@ Client::Client()
 	_chanId = -1;
 	_ctl = 0;
 	_fd = -1;
+	_nick = "None";
 }
 Client::Client(const Client &other)
 {
@@ -16,6 +17,7 @@ Client::Client(const Client &other)
 	_ctl = other._ctl;
 	_tokens = other._tokens;
 	_fd = other._fd;
+	_nick = other._nick;
 }
 Client &Client::operator=(const Client &other)
 {
@@ -27,13 +29,19 @@ Client &Client::operator=(const Client &other)
 		_ctl = other._ctl;
 		_tokens = other._tokens;
 		_fd = other._fd;
+		_nick = other._nick;
 	}
 	return (*this);
 }
 Client::~Client() {}
 
+// FD
 int Client::getFd() { return (_fd); }
 void Client::setFd(int fd) { _fd = fd; }
+
+// NICKNAME
+std::string Client::getNick() { return (_nick); }
+void Client::setNick(std::string nick) { _nick = nick; }
 
 // ADDRESS
 sockaddr_in Client::getAddr() { return (_addr); }

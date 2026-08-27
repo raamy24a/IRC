@@ -124,11 +124,8 @@ void Server::readCommand(int fd, std::string buffer)
 		}
 		else
 		{
-			// Convert FD, from int to string
-			std::ostringstream fd_str;
-			fd_str << fd;
-			// Concatenate Nickname (now fd) with client's msg
-			std::string buff = fd_str.str() + " : " + buffer + '\n';
+			// Concatenate Nickname with client's msg
+			std::string buff = user.getNick() + " : " + buffer + '\n';
 
 			std::map<int, Client>::iterator it;
 			for (it = _clients.begin(); it != _clients.end(); it++)
@@ -165,7 +162,7 @@ void Server::handleCmds(Client user)
 	else if (cmd == "msg")
 		msgClient(user);
 	else if (cmd == "nick")
-		std::cout << "Change nickname" << std::endl;
+		changeNick(user);
 	else
 	{
 		std::string str = "<" + cmd + ">" + " :Unknown command\n";
@@ -173,21 +170,29 @@ void Server::handleCmds(Client user)
 	}
 }
 
-void Server::removeTokens(int fd)
+void Server::changeNick(Client user)
 {
-	int size = _clients[fd].getToken().size();
-	for (int i = 0; i < size; i++)
-		_clients[fd].getToken().pop_back();
-}
+	std::vector<std::string> tokens = user.getToken();
 
-void Server::splitTokens(int fd, std::string buffer)
-{
-	std::stringstream ss(buffer);
-	std::string token;
-
-	while (getline(ss, token, ' '))
-		if (!token.empty())
-			_clients[fd].setToken(token);
+	if (tokens.size() != 2)
+		send(user.getFd(), "<nick> :No nickname given.\n", 28, 0);
+	else
+	{
+		std::map<int, Client>::iterator it;
+		for (it = _clients.begin(); it != _clients.end(); it++)
+		{
+			if (_clients[it->first].getNick() == tokens.at(1))
+			{
+				if (it->first == user.getFd())
+					send(user.getFd(), "<nick> :Nickname in use is the same\n", 37, 0);
+				else
+					send(user.getFd(), "<nick> :Nickname is already in use\n", 36, 0);
+				break;
+			}
+		}
+		if (it == _clients.end())
+			_clients[user.getFd()].setNick(tokens.at(1));
+	}
 }
 
 void Server::msgClient(Client user)
@@ -213,4 +218,21 @@ void Server::joinChan(Client user)
 		send(user.getFd(), "Error: Wrong /join syntax.\n", 28, 0);
 	else if (tokens.at(1).at(0) == '#' && tokens.at(1).at(1))
 		_clients[user.getFd()].setChan(true, tokens.at(1).substr(1, tokens.at(1).size() - 1));
+}
+
+void Server::removeTokens(int fd)
+{
+	int size = _clients[fd].getToken().size();
+	for (int i = 0; i < size; i++)
+		_clients[fd].getToken().pop_back();
+}
+
+void Server::splitTokens(int fd, std::string buffer)
+{
+	std::stringstream ss(buffer);
+	std::string token;
+
+	while (getline(ss, token, ' '))
+		if (!token.empty())
+			_clients[fd].setToken(token);
 }
