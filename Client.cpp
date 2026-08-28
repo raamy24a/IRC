@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/08/27 11:04:04 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/28 05:55:55 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,17 @@ void Client::sendRegistration() {
 
     send(_cfd, reply.c_str(), reply.length(), 0);
 }
-void Client::parse(std::string parse)
+void Client::parse(std::string parse, const Server& server)
 {
-    if (parse.find("NICK") != std::string::npos)
+    if (parse.find("NICK") == 0)
         this->_nickname = parse.substr(5, parse.length() - 2);
-    else if (parse.find("USER") != std::string::npos)
+    else if (parse.find("USER") == 0)
         this->_username = parse.substr(5, parse.length() - 2);
-    else if (parse.find("CAP END") != std::string::npos)
+    else if (parse.find("CAP END") == 0)
         this->sendRegistration();
+    else if (parse.find("JOIN :") == 0)
+        this->addClientToChannel(parse, this->_cfd, server);
+        
 }
 
 std::string Client::removeBuffer()

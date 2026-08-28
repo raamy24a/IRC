@@ -29,4 +29,5 @@ class Server
         int _fd;
         int _epollfd;
         std::map<int, Client> _clientMap;
+        std
 } ;
