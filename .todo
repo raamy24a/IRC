@@ -72,3 +72,6 @@ Client:
       Nickname :
             - Maximum length of 9
             - Nickname chosen at Authentification ?
+Channel modes:
+      - l : fix the max number of participants in a chan
+      - i : Chan access limited to invite only

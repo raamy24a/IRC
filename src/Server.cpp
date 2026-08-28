@@ -218,12 +218,13 @@ void Server::joinChan(Client user)
 		send(user.getFd(), "Error: Wrong /join syntax.\n", 28, 0);
 	else if (tokens.at(1).at(0) == '#' && tokens.at(1).at(1))
 		_clients[user.getFd()].setChan(true, tokens.at(1).substr(1, tokens.at(1).size() - 1));
+	else if (tokens.at(1).at(0) != '#')
+		send(user.getFd(), "Error: Failed /join\nMissing '#' before channel name.\n", 54, 0);
 }
 
 void Server::removeTokens(int fd)
 {
-	int size = _clients[fd].getToken().size();
-	for (int i = 0; i < size; i++)
+	while (_clients[fd].getToken().size())
 		_clients[fd].getToken().pop_back();
 }
 
