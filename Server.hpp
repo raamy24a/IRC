@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sys/epoll.h>
 #include "Client.hpp"
+#include "Channel.hpp"
 #include <map>
 #include <csignal>
 #define MY_SOCK_PATH "/somepath"
@@ -24,10 +25,15 @@ class Server
         Server(char *port, char *password);
         ~Server();
         void addClientToServ();
+        bool isChannel(std::string str) const;
+        void addClientToChan(std::string channel_name, int cfd);
+        void sendToChannel(std::string str, std::string channel_name);
+        void createChannel(std::string channel_name, int cfd);
 
     private :
         int _fd;
         int _epollfd;
         std::map<int, Client> _clientMap;
-        std
+        std::map<std::string, Channel> _channels;
 } ;
+bool isChannelValid(std::string str);

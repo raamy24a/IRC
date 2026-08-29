@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:08 by radib             #+#    #+#             */
-/*   Updated: 2026/08/28 05:55:53 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/28 23:34:20 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,9 @@
 #include <csignal>
 #include "Channel.hpp"
 #include <vector>
+#include <sstream>
+
+class Server;
 
 class Client
 {
@@ -24,11 +27,11 @@ class Client
         Client();
         void sendRegistration();
         ~Client();
-        void parse(std::string parse);
+        void parse(std::string parse, const Server& server);
         int get_clientfd();
         void addBuffer(char *buffer);
         std::string removeBuffer();
-        void addClientToChannel(std::string parse, int cfd, const Server& server);
+        void addClientToChannel(std::string parse, Server& server);
 
     private :
         std::string _username;

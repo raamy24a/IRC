@@ -1,6 +1,37 @@
 #include "Server.hpp"
 #include "Client.hpp"
 
+bool isChannelValid(std::string str)
+{
+    if (str[0] == '#' || str[0] == '&' || str[0] == '!' || str[0] )
+    {
+        if (str.length() > 50)
+            return false;
+        else if (str.length() < 1 || str.find(',', 1) != std::string::npos || str.find(' ', 1) != std::string::npos, str.find(7, 1) != std::string::npos || str.find(':', 1) != std::string::npos)
+            return false;
+        return true;
+    }
+}
+bool Server::isChannel(std::string str) const
+{
+    if (_channels.count(str))
+        return true;
+    return false;
+}
+
+void Server::createChannel(std::string channel_name, int _cfd)
+{
+    _channels[channel_name] = Channel(_cfd, channel_name);
+}
+void Server::sendToChannel(std::string str, std::string channel_name)
+{
+    _channels[channel_name].sendToChannel(std::string str);
+}
+void Server::addClientToChan(std::string channel_name, int cfd)
+{
+    _channels[channel_name].AddClient(cfd);
+
+}
 void Server::addClientToServ()
 {
     int cfd = accept(_fd, 0, 0);

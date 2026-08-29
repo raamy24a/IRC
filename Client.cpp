@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/08/28 05:55:55 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/29 00:12:27 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,26 @@ void Client::sendRegistration() {
 
     send(_cfd, reply.c_str(), reply.length(), 0);
 }
+void Client::addClientToChannel(std::string parse, Server& server)
+{
+    if (parse.find(',', 0) != std::string::npos)
+    {
+        std::stringstream ss(parse);
+	    std::string token;
+
+	    while (getline(ss, token, ','))
+        {
+		    if (!token.empty() && isChannelValid(token) && !server.isChannel(token))
+            {
+                server.createChannel(token, _cfd);
+            }
+            else if (!token.empty() && isChannelValid(token) && server.isChannel(token))
+                server.AddClient(token, _cfd);
+        }
+			    
+    }
+}
+
 void Client::parse(std::string parse, const Server& server)
 {
     if (parse.find("NICK") == 0)
@@ -56,8 +76,8 @@ void Client::parse(std::string parse, const Server& server)
         this->_username = parse.substr(5, parse.length() - 2);
     else if (parse.find("CAP END") == 0)
         this->sendRegistration();
-    else if (parse.find("JOIN :") == 0)
-        this->addClientToChannel(parse, this->_cfd, server);
+    else if (parse.find("JOIN ") == 0)
+        this->addClientToChannel(parse, server);
         
 }
 
