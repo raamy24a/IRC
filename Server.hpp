@@ -24,6 +24,7 @@ class Server
     public :
         Server(char *port, char *password);
         ~Server();
+        bool AddClient(std::string chan, int cfd);
         void addClientToServ();
         bool isChannel(std::string str) const;
         void addClientToChan(std::string channel_name, int cfd);

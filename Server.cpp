@@ -11,6 +11,7 @@ bool isChannelValid(std::string str)
             return false;
         return true;
     }
+    return false;
 }
 bool Server::isChannel(std::string str) const
 {
@@ -23,15 +24,23 @@ void Server::createChannel(std::string channel_name, int _cfd)
 {
     _channels[channel_name] = Channel(_cfd, channel_name);
 }
+bool Server::AddClient(std::string chan, int cfd)
+{
+    if (_channels[chan].AddClient(cfd))
+        return true;
+    return false;
+}
 void Server::sendToChannel(std::string str, std::string channel_name)
 {
-    _channels[channel_name].sendToChannel(std::string str);
+    _channels[channel_name].sendToChannel(str);
 }
 void Server::addClientToChan(std::string channel_name, int cfd)
 {
     _channels[channel_name].AddClient(cfd);
 
 }
+
+
 void Server::addClientToServ()
 {
     int cfd = accept(_fd, 0, 0);
@@ -102,7 +111,10 @@ Server::Server(char *port, char *password)
                 memset(buffer, 0, 200);
                 readbuff = read(events[i].data.fd, &buffer, 199);
                 if (readbuff)
-                    _clientMap[events[i].data.fd].addBuffer(buffer);
+                {
+                    std::cout << "RECV :" << buffer;
+                    _clientMap[events[i].data.fd].addBuffer(buffer, *this);
+                }
                 else
                 {
                     epoll_ctl(_epollfd, EPOLL_CTL_DEL, _fd, &ev);

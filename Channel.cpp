@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/26 01:37:06 by radib             #+#    #+#             */
-/*   Updated: 2026/08/29 02:25:00 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/30 00:32:36 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,10 @@ bool Channel::isClientOperator(int cfd) const
 {
     return _clients.count(cfd);
 }
-void Channel::AddClient(int cfd)
+bool Channel::AddClient(int cfd)
 {
+    if (_clients.count(cfd))
+        return false;
     _clients.insert(std::pair<int, bool>(cfd, false));
+    return true;
 }
