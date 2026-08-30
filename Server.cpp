@@ -20,6 +20,20 @@ bool Server::isChannel(std::string str) const
     return false;
 }
 
+int  Server::returnClientFd(std::string client_name)
+{
+    std::map<int, Client>::iterator it = _clientMap.begin();
+
+    while(it != _clientMap.end())
+    {
+        if ((*it).second.IsClient(client_name))
+        {
+            return ((*it).first);
+        }
+    }
+    return (-1);
+}
+
 void Server::createChannel(std::string channel_name, int _cfd)
 {
     _channels[channel_name] = Channel(_cfd, channel_name);

@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/08/30 02:12:32 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/30 05:23:23 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,13 @@ void Client::addBuffer(char *buffer, Server& server)
         return ;
     while (this->removeBuffer(server) != "");
 }
+bool Client::IsClient(std::string client_name)
+{
+    if (client_name == _username)
+        return (true);
+    return (false);
+}
+
 
 void Client::sendRegistration() {
     std::string reply;
@@ -100,12 +107,27 @@ void Client::parse(std::string parse, Server& server)
         std::cout << "SEND" << "PONG ircserv\r\n";
         send(_cfd, "PONG ircserv\r\n", 15, 0);
     }
+    else if (parse.find("MODE !") == 0 || parse.find("MODE &") == 0 || parse.find("MODE #") == 0 || parse.find("MODE +") == 0)
+    {
+        
+    }
     else if (parse.find("MODE") == 0)
     {
         std::string str;
         str = "MODE " + _username + " +i\r\n";
         std::cout << "SEND" << str;
         send(_cfd, str.c_str(), str.length(), 0);
+    }
+    else if (parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG &") == 0 || parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG +") == 0)
+    {
+        if (server.isChannel(parse.substr(8, parse.find(' '))))
+            server.sendToChannel(parse.substr(parse.find(':'), parse.length()), parse.substr(8, parse.find(' ')));
+    }
+    else if (parse.find("PRIVMSG") == 0 )
+    {
+        int clientFD = server.returnClientFd(parse.substr(8, parse.find(' ')));
+        if ( clientFD != -1)
+            send(clientFD, parse.substr(parse.find(':'), parse.length()).c_str(), parse.substr(parse.find(':'), parse.length()).length(), 0);
     }
 }
 
