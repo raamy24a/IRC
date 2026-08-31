@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/26 01:37:06 by radib             #+#    #+#             */
-/*   Updated: 2026/08/31 05:55:53 by radib            ###   ########.fr       */
+/*   Updated: 2026/09/01 00:09:28 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,13 @@ static void sendDEBUG(int __fd, const void *__buf, size_t __n, int __flags)
     send(__fd, __buf, __n, __flags);
 }
 
-void Channel::sendToChannel(std::string str)
+void Channel::sendToChannel(std::string str, int sender_fd)
 {
     std::map<int,  bool>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
-        sendDEBUG((*it).first, str.c_str(), str.length(), 0);
+        if (sender_fd != (*it).first)
+            sendDEBUG((*it).first, str.c_str(), str.length(), 0);
         it++;
     }
 }

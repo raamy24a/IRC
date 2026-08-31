@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/26 01:37:08 by radib             #+#    #+#             */
-/*   Updated: 2026/08/31 05:53:00 by radib            ###   ########.fr       */
+/*   Updated: 2026/09/01 00:05:50 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class Channel
         void AddOperator(int cfd);
         bool isClientOperator(int cfd) const;
         bool AddClient(int cfd);
-        void sendToChannel(std::string str);
+        void sendToChannel(std::string str, int sender_fd);
 
         
     private :

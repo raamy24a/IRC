@@ -44,9 +44,9 @@ bool Server::AddClient(std::string chan, int cfd)
         return true;
     return false;
 }
-void Server::sendToChannel(std::string str, std::string channel_name)
+void Server::sendToChannel(std::string str, std::string channel_name, int sender_fd)
 {
-    _channels[channel_name].sendToChannel(str);
+    _channels[channel_name].sendToChannel(str, sender_fd);
 }
 void Server::addClientToChan(std::string channel_name, int cfd)
 {

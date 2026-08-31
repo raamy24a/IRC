@@ -28,7 +28,7 @@ class Server
         void addClientToServ();
         bool isChannel(std::string str) const;
         void addClientToChan(std::string channel_name, int cfd);
-        void sendToChannel(std::string str, std::string channel_name);
+        void sendToChannel(std::string str, std::string channel_name, int sender_fd);
         void createChannel(std::string channel_name, int cfd);
         int  returnClientFd(std::string client_name);
 

@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/08/31 14:29:51 by radib            ###   ########.fr       */
+/*   Updated: 2026/09/01 00:06:48 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void Client::addClientHelper(std::string token, int _cfd, Server& server)
         {
             
             std::string str = ':' + _nickname + '!' + _username + "@host JOIN " + token;        
-            server.sendToChannel(str, token);
+            server.sendToChannel(str, token, _cfd);
         }
 }
 void Client::addClientToChannel(std::string parse, Server& server)
@@ -135,13 +135,13 @@ void Client::parse(std::string parse, Server& server)
         getline(ss, token, ' ');
         if (server.isChannel(token))
         {
-            server.sendToChannel(token, addCRLF(parse.substr(8, parse.find(' ') + 1)));
+            std::string temp = ":" + _nickname + "!" + _username + "@127.0.0.1 " + parse;
+            server.sendToChannel(addCRLF(temp), token, _cfd);
         }
     }
     else if (parse.find("PRIVMSG") == 0 )
     {
-        std::cout << "nick : "<< addCRLF(parse.substr(8, parse.find(' ') + 1)) << std::endl;
-        int clientFD = server.returnClientFd(addCRLF(parse.substr(8, parse.find(' ') + 1)));
+        int clientFD = server.returnClientFd(parse.substr(8, parse.find(' ') + 1));
         if ( clientFD != -1)
         {
             sendDEBUG(clientFD, parse.substr(parse.find(':'), parse.length() + 1).c_str(), parse.substr(parse.find(':'), parse.length() + 1).length(), 0);
