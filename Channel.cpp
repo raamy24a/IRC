@@ -6,18 +6,25 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/26 01:37:06 by radib             #+#    #+#             */
-/*   Updated: 2026/08/30 00:32:36 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/31 05:55:53 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
+
+
+static void sendDEBUG(int __fd, const void *__buf, size_t __n, int __flags)
+{
+    std::cout << "send: " << std::string(static_cast<const char*>(__buf), __n) << std::endl;
+    send(__fd, __buf, __n, __flags);
+}
 
 void Channel::sendToChannel(std::string str)
 {
     std::map<int,  bool>::iterator it = _clients.begin();
     while (it != _clients.end())
     {
-        send((*it).first, str.c_str(), str.length(), 0);
+        sendDEBUG((*it).first, str.c_str(), str.length(), 0);
         it++;
     }
 }

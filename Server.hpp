@@ -39,3 +39,4 @@ class Server
         std::map<std::string, Channel> _channels;
 } ;
 bool isChannelValid(std::string str);
+

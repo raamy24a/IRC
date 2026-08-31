@@ -6,12 +6,20 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/08/30 05:23:23 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/31 14:29:51 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 #include "Server.hpp"
+
+static void sendDEBUG(int __fd, const void *__buf, size_t __n, int __flags)
+{
+    std::cout << "send: " << std::string(static_cast<const char*>(__buf), __n) << std::endl;
+    send(__fd, __buf, __n, __flags);
+}
+
+std::string addCRLF(std::string str){return (str + "\r\n");}
 
 Client::Client()
 {
@@ -53,8 +61,22 @@ void Client::sendRegistration() {
     reply += ":ircserv 004 " + _nickname + " ircserv 1.0 i tkol\r\n";
     reply += ":ircserv 422 " + _nickname + " :MOTD File is missing\r\n";
     reply += ":ircserv 376 " + _nickname + " :End of /MOTD command\r\n";
-    std::cout << "SEND :" << reply << std::endl;
-    send(_cfd, reply.c_str(), reply.length(), 0);
+    sendDEBUG(_cfd, reply.c_str(), reply.length(), 0);
+}
+
+void Client::addClientHelper(std::string token, int _cfd, Server& server)
+{
+    if (!token.empty() && isChannelValid(token) && !server.isChannel(token))
+    {
+        server.createChannel(token, _cfd);
+    }
+    else if (!token.empty() && isChannelValid(token) && server.isChannel(token))
+        if (server.AddClient(token, _cfd))
+        {
+            
+            std::string str = ':' + _nickname + '!' + _username + "@host JOIN " + token;        
+            server.sendToChannel(str, token);
+        }
 }
 void Client::addClientToChannel(std::string parse, Server& server)
 {
@@ -64,20 +86,10 @@ void Client::addClientToChannel(std::string parse, Server& server)
 	    std::string token;
 
 	    while (getline(ss, token, ','))
-        {
-		    if (!token.empty() && isChannelValid(token) && !server.isChannel(token))
-            {
-                server.createChannel(token, _cfd);
-            }
-            else if (!token.empty() && isChannelValid(token) && server.isChannel(token))
-                if (server.AddClient(token, _cfd))
-                {
-                    
-                    std::string str = ':' + _nickname + '!' + _username + "@host JOIN " + token;        
-                    server.sendToChannel(str, token);
-                }
-        }
+		    this->addClientHelper(token, _cfd, server);
     }
+    else
+	   this->addClientHelper(parse, _cfd, server);
 }
 
 void Client::parse(std::string parse, Server& server)
@@ -89,8 +101,7 @@ void Client::parse(std::string parse, Server& server)
     }
     else if (parse.find("CAP LS 302") == 0)
     {
-        send(_cfd, ":ircserv CAP * LS :\r\n", 22, 0);
-        std::cout << "SEND :" << ":ircserv CAP * LS :\r\n";
+        sendDEBUG(_cfd, ":ircserv CAP * LS :\r\n", 22, 0);
     }
     else if (parse.find("USER") == 0)
     {
@@ -101,11 +112,10 @@ void Client::parse(std::string parse, Server& server)
     else if (parse.find("CAP END") == 0)
         return ;
     else if (parse.find("JOIN ") == 0)
-        this->addClientToChannel(parse, server);
+        this->addClientToChannel(parse.substr(5, parse.length() + 1), server);
     else if (parse.find("PING") == 0)
     {
-        std::cout << "SEND" << "PONG ircserv\r\n";
-        send(_cfd, "PONG ircserv\r\n", 15, 0);
+        sendDEBUG(_cfd, "PONG ircserv\r\n", 15, 0);
     }
     else if (parse.find("MODE !") == 0 || parse.find("MODE &") == 0 || parse.find("MODE #") == 0 || parse.find("MODE +") == 0)
     {
@@ -115,19 +125,27 @@ void Client::parse(std::string parse, Server& server)
     {
         std::string str;
         str = "MODE " + _username + " +i\r\n";
-        std::cout << "SEND" << str;
-        send(_cfd, str.c_str(), str.length(), 0);
+        sendDEBUG(_cfd, str.c_str(), str.length(), 0);
     }
     else if (parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG &") == 0 || parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG +") == 0)
     {
-        if (server.isChannel(parse.substr(8, parse.find(' '))))
-            server.sendToChannel(parse.substr(parse.find(':'), parse.length()), parse.substr(8, parse.find(' ')));
+        std::stringstream ss(parse);
+	    std::string token;
+        getline(ss, token, ' ');
+        getline(ss, token, ' ');
+        if (server.isChannel(token))
+        {
+            server.sendToChannel(token, addCRLF(parse.substr(8, parse.find(' ') + 1)));
+        }
     }
     else if (parse.find("PRIVMSG") == 0 )
     {
-        int clientFD = server.returnClientFd(parse.substr(8, parse.find(' ')));
+        std::cout << "nick : "<< addCRLF(parse.substr(8, parse.find(' ') + 1)) << std::endl;
+        int clientFD = server.returnClientFd(addCRLF(parse.substr(8, parse.find(' ') + 1)));
         if ( clientFD != -1)
-            send(clientFD, parse.substr(parse.find(':'), parse.length()).c_str(), parse.substr(parse.find(':'), parse.length()).length(), 0);
+        {
+            sendDEBUG(clientFD, parse.substr(parse.find(':'), parse.length() + 1).c_str(), parse.substr(parse.find(':'), parse.length() + 1).length(), 0);
+        }
     }
 }
 

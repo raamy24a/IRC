@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:08 by radib             #+#    #+#             */
-/*   Updated: 2026/08/30 05:15:18 by radib            ###   ########.fr       */
+/*   Updated: 2026/08/31 06:15:35 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,8 @@ class Client
         void addBuffer(char *buffer, Server& server);
         std::string removeBuffer(Server& server);
         void addClientToChannel(std::string parse, Server& server);
+        void addClientHelper(std::string token, int _cfd, Server& server);
+
 
     private :
         std::string _username;

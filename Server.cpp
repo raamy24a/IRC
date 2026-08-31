@@ -126,7 +126,7 @@ Server::Server(char *port, char *password)
                 readbuff = read(events[i].data.fd, &buffer, 199);
                 if (readbuff)
                 {
-                    std::cout << "RECV :" << buffer;
+                    std::cout << "RECV: " << buffer;
                     _clientMap[events[i].data.fd].addBuffer(buffer, *this);
                 }
                 else
