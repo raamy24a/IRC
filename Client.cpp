@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/09/01 00:06:48 by radib            ###   ########.fr       */
+/*   Updated: 2026/09/01 03:58:03 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ Client::Client()
 }
 Client::Client(int fd)
 {
+    int flags = fcntl(fd, F_GETFL, 0);
+    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     _cfd = fd;
 }
 
@@ -46,7 +48,7 @@ void Client::addBuffer(char *buffer, Server& server)
 }
 bool Client::IsClient(std::string client_name)
 {
-    if (client_name == _username)
+    if (client_name == _nickname)
         return (true);
     return (false);
 }
@@ -127,7 +129,7 @@ void Client::parse(std::string parse, Server& server)
         str = "MODE " + _username + " +i\r\n";
         sendDEBUG(_cfd, str.c_str(), str.length(), 0);
     }
-    else if (parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG &") == 0 || parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG +") == 0)
+    else if (parse.find("PRIVMSG #") == 0 || parse.find("PRIVMSG &") == 0 || parse.find("PRIVMSG !") == 0 || parse.find("PRIVMSG +") == 0)
     {
         std::stringstream ss(parse);
 	    std::string token;
@@ -141,10 +143,15 @@ void Client::parse(std::string parse, Server& server)
     }
     else if (parse.find("PRIVMSG") == 0 )
     {
-        int clientFD = server.returnClientFd(parse.substr(8, parse.find(' ') + 1));
+        std::stringstream ss(parse);
+	    std::string token;
+        getline(ss, token, ' ');
+        getline(ss, token, ' ');
+        int clientFD = server.returnClientFd(token);
         if ( clientFD != -1)
         {
-            sendDEBUG(clientFD, parse.substr(parse.find(':'), parse.length() + 1).c_str(), parse.substr(parse.find(':'), parse.length() + 1).length(), 0);
+            std::string temp = ":" + _nickname + "!" + _username + "@127.0.0.1 " + parse;
+            sendDEBUG(clientFD, temp.c_str(), temp.length(), 0);
         }
     }
 }

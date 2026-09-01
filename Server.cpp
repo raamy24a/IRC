@@ -30,6 +30,7 @@ int  Server::returnClientFd(std::string client_name)
         {
             return ((*it).first);
         }
+        it++;
     }
     return (-1);
 }
@@ -110,7 +111,7 @@ Server::Server(char *port, char *password)
     // check return value epoll_ctl(edgecaserror)
     while (g_server_status)
     {
-        int eventAmmount = epoll_wait(_epollfd, events, 10, 0);
+        int eventAmmount = epoll_wait(_epollfd, events, 10, -1);
         int i = 0;
         while (i < eventAmmount)
         {
@@ -123,7 +124,7 @@ Server::Server(char *port, char *password)
                 char buffer[200];
                 int readbuff = 1;
                 memset(buffer, 0, 200);
-                readbuff = read(events[i].data.fd, &buffer, 199);
+                readbuff = recv(events[i].data.fd, &buffer, 199, 0);
                 if (readbuff)
                 {
                     std::cout << "RECV: " << buffer;
@@ -131,7 +132,7 @@ Server::Server(char *port, char *password)
                 }
                 else
                 {
-                    epoll_ctl(_epollfd, EPOLL_CTL_DEL, _fd, &ev);
+                    epoll_ctl(_epollfd, EPOLL_CTL_DEL, events[i].data.fd, &ev);
                     close(events[i].data.fd);
                 }
             }

@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:08 by radib             #+#    #+#             */
-/*   Updated: 2026/09/01 00:06:06 by radib            ###   ########.fr       */
+/*   Updated: 2026/09/01 03:04:08 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "Channel.hpp"
 #include <vector>
 #include <sstream>
+#include <fcntl.h>
 
 class Server;
 
