@@ -6,7 +6,7 @@
 /*   By: radib <radib@student.42belgium.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 20:37:13 by radib             #+#    #+#             */
-/*   Updated: 2026/09/01 03:58:03 by radib            ###   ########.fr       */
+/*   Updated: 2026/09/04 03:39:46 by radib            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,7 @@ void Client::parse(std::string parse, Server& server)
         int clientFD = server.returnClientFd(token);
         if ( clientFD != -1)
         {
-            std::string temp = ":" + _nickname + "!" + _username + "@127.0.0.1 " + parse;
+            std::string temp = ":" + _nickname + "!" + _username + "@127.0.0.1 " + parse + "\r\n";
             sendDEBUG(clientFD, temp.c_str(), temp.length(), 0);
         }
     }
