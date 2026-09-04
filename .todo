@@ -75,3 +75,5 @@ Client:
 Channel modes:
       - l : fix the max number of participants in a chan
       - i : Chan access limited to invite only
+
+- Operator == creator of the Channel
