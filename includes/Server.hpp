@@ -33,11 +33,14 @@ public:
     void createChannel(std::string channel_name, int cfd);
     int returnClientFd(std::string client_name);
 
+    std::string getPswd();
+
 private:
     int _fd;
     int _epollfd;
     std::map<int, Client> _clientMap;
     std::map<std::string, Channel> _channels;
+    std::string _pswd;
 };
 
 bool isChannelValid(std::string str);

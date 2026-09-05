@@ -70,6 +70,9 @@ void Server::addClientToServ()
 
 Server::Server(char *port, char *password)
 {
+    // std::string pswd(password);
+    _pswd = password;
+
     // setsockopt(_fd, );
     sockaddr_in my_addr;
     memset(&my_addr, 0, sizeof(sockaddr_in));
@@ -140,8 +143,9 @@ Server::Server(char *port, char *password)
 
     if (close(_fd) == -1)
         throw("Error close");
-    (void)password;
 }
+
+std::string Server::getPswd() { return (_pswd); }
 
 Server::~Server()
 {

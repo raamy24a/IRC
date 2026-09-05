@@ -139,6 +139,20 @@ void Client::parse(std::string parse, Server &server)
             sendDEBUG(clientFD, temp.c_str(), temp.length(), 0);
         }
     }
+    else if (parse.find("PASS") == 0)
+    {
+        // std::cout << "HERE :" << server.getPswd() << " | " << parse.substr(5, parse.size()) << std::endl;
+        if (server.getPswd() != parse.substr(5, parse.size()))
+        {
+            std::cout << "Refused" << std::endl;
+            // END REGISTRATION //
+            // Send smtg on Server FD to cancel registration ?
+        }
+        // else
+        // {
+        //     std::cout << "Accepted" << std::endl;
+        // }
+    }
 }
 
 std::string Client::removeBuffer(Server &server)
