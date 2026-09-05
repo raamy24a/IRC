@@ -1,47 +1,43 @@
 #pragma once
-#include "Client.hpp"
-
-#include <string>
-#include <iostream>
-#include <map>
-#include <sstream>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <netinet/in.h>
 #include <unistd.h>
 #include <cstdlib>
-
+#include <string>
 #include <sys/socket.h>
-#include <netinet/in.h>
-// #include <netdb.h>
-
+#include <stdint.h>
+#include <iostream>
 #include <sys/epoll.h>
+#include "Client.hpp"
+#include "Channel.hpp"
+#include <map>
+#include <csignal>
+#define MY_SOCK_PATH "/somepath"
+#define LISTEN_BACKLOG 50
+
+extern volatile std::sig_atomic_t g_server_status;
 
 class Server
 {
 public:
-	Server();
-	Server(std::string port, std::string pswd);
-	// Server(const Server &Other);
-	// Server operator=(const Server &Other);
-	~Server();
+    Server(char *port, char *password);
+    ~Server();
 
-	void init();
-
-	void readCommand(int fd, std::string buffer);
-	void handleCmds(Client user);
-
-	void splitTokens(int fd, std::string buffer);
-	void removeTokens(int fd);
-
-	void joinChan(Client user);
-	void msgClient(Client user);
-	void changeNick(Client user);
+    bool AddClient(std::string chan, int cfd);
+    void addClientToServ();
+    bool isChannel(std::string str) const;
+    void addClientToChan(std::string channel_name, int cfd);
+    void sendToChannel(std::string str, std::string channel_name, int sender_fd);
+    void createChannel(std::string channel_name, int cfd);
+    int returnClientFd(std::string client_name);
 
 private:
-	int _serverFd;
-	// Server Port
-	uint16_t _port;
-	// Server Password
-	std::string _password;
-	// Map of every Clients associated to their FDs
-	std::map<int, Client> _clients;
+    int _fd;
+    int _epollfd;
+    std::map<int, Client> _clientMap;
+    std::map<std::string, Channel> _channels;
 };
+
+bool isChannelValid(std::string str);

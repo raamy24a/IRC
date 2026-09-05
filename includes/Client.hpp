@@ -1,48 +1,34 @@
 #pragma once
-#include <string>
+#include <map>
+#include <csignal>
+#include "Channel.hpp"
 #include <vector>
 #include <sstream>
+#include <fcntl.h>
 
-#include <netinet/in.h>
-#include <sys/epoll.h>
+class Server;
 
 class Client
 {
 public:
-	Client();
-	Client(const Client &other);
-	Client &operator=(const Client &other);
-	~Client();
+    Client();
+    Client(int fd);
+    ~Client();
 
-	int getFd();
-	void setFd(int fd);
-
-	std::string getNick();
-	void setNick(std::string nick);
-
-	sockaddr_in getAddr();
-	void setAddr(sockaddr_in address);
-
-	// Return true if client is in a channel
-	bool isInChan();
-	// Return the channel name
-	std::string getChan();
-	// Set the channel name where the client is
-	void setChan(bool io, std::string id);
-
-	void setCtl(int ctl);
-	int getCtl();
-
-	// Store a token in client vector
-	void setToken(std::string str);
-	std::vector<std::string> &getToken();
+    void sendRegistration();
+    void parse(std::string parse, Server &server);
+    int get_clientfd();
+    bool IsClient(std::string client_name);
+    void addBuffer(char *buffer, Server &server);
+    std::string removeBuffer(Server &server);
+    void addClientToChannel(std::string parse, Server &server);
+    void addClientHelper(std::string token, int _cfd, Server &server);
 
 private:
-	sockaddr_in _addr;
-	bool _inChan;
-	std::string _chanId;
-	int _ctl;
-	std::vector<std::string> _tokens;
-	int _fd;
-	std::string _nick;
+    std::string _username;
+    std::string _nickname;
+    std::vector<Channel> _channels;
+    bool _operator;
+    int _cfd;
+    std::string _clientString;
 };
