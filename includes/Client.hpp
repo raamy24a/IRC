@@ -24,6 +24,9 @@ public:
     void addClientToChannel(std::string parse, Server &server);
     void addClientHelper(std::string token, int _cfd, Server &server);
 
+    void setPasswordRight(bool b);
+    bool getPasswordRight();
+
 private:
     std::string _username;
     std::string _nickname;
@@ -31,4 +34,5 @@ private:
     bool _operator;
     int _cfd;
     std::string _clientString;
+    bool _passwordRight;
 };

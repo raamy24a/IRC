@@ -82,7 +82,7 @@ void Client::addClientToChannel(std::string parse, Server &server)
 
 void Client::parse(std::string parse, Server &server)
 {
-    if (parse.find("NICK") == 0)
+    if (parse.find("NICK") == 0 && getPasswordRight())
     {
         std::string params = parse.substr(5);
         this->_nickname = params.substr(0, params.find(' '));
@@ -91,7 +91,7 @@ void Client::parse(std::string parse, Server &server)
     {
         sendDEBUG(_cfd, ":ircserv CAP * LS :\r\n", 22, 0);
     }
-    else if (parse.find("USER") == 0)
+    else if (parse.find("USER") == 0 && getPasswordRight())
     {
         std::string params = parse.substr(5);
         this->_username = params.substr(0, params.find(' '));
@@ -141,17 +141,17 @@ void Client::parse(std::string parse, Server &server)
     }
     else if (parse.find("PASS") == 0)
     {
-        // std::cout << "HERE :" << server.getPswd() << " | " << parse.substr(5, parse.size()) << std::endl;
         if (server.getPswd() != parse.substr(5, parse.size()))
         {
             std::cout << "Refused" << std::endl;
             // END REGISTRATION //
-            // Send smtg on Server FD to cancel registration ?
+            std::string reply = ":ircserv 464 " + _nickname + " :Password incorrect\r\n";
+            sendDEBUG(_cfd, reply.c_str(), reply.length(), 0);
+            setPasswordRight(false);
+            // close(_cfd);
         }
-        // else
-        // {
-        //     std::cout << "Accepted" << std::endl;
-        // }
+        else
+            setPasswordRight(true);
     }
 }
 
@@ -168,3 +168,7 @@ std::string Client::removeBuffer(Server &server)
     // std::cout << ret << std::endl;
     return (ret);
 }
+
+void Client::setPasswordRight(bool b) { _passwordRight = b; }
+
+bool Client::getPasswordRight() { return (_passwordRight); }
